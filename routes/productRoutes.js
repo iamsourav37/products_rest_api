@@ -56,10 +56,14 @@ router.post("/", (req, res, next) => {
 router.get("/:id_or_name", async (req, res) => {
   const id_or_name = req.params.id_or_name;
 
+  console.log("id_or_name: ", id_or_name);
+  console.log("true or not : ", mongoose.Types.ObjectId.isValid(id_or_name));
+
   if (mongoose.Types.ObjectId.isValid(id_or_name)) {
     // ! find by id
     try {
       const result = await Product.findById(id_or_name);
+
       return res.json({
         product: result,
       });
@@ -75,6 +79,7 @@ router.get("/:id_or_name", async (req, res) => {
       const result = await Product.find({
         name: new RegExp(`^${id_or_name}$`, "i"),
       });
+
       return res.json({
         product: result,
       });
@@ -84,6 +89,30 @@ router.get("/:id_or_name", async (req, res) => {
         error,
       });
     }
+  }
+});
+
+router.delete("/:id", async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const result = await Product.findByIdAndDelete(id);
+
+    if (result) {
+      return res.json({
+        message: "product deleted",
+        result,
+      });
+    } else {
+      return res.status(400).json({
+        message: "no data found, db is empty",
+      });
+    }
+  } catch (error) {
+    return res.status(400).json({
+      message: "NOT DELETE",
+      error,
+    });
   }
 });
 module.exports = router;
